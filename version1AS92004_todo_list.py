@@ -1,8 +1,9 @@
-#Version 2.0
+#Version 3.0
 # This program will be about a chess quiz that ranges from difficulty--easy, medium, or hard.
 #Github commit: Start the backbone of the structure and work on the welcomeText and defiining the constants and dictionaries
+#Done the display insturctions and ready quiz. They run as usual
 
-#TODO Fix the displayInstructions to accept the user to try again with the input
+#TODO Fix errors within the run quiz function.
 
 #modules
 import time
@@ -16,6 +17,9 @@ MAX_AGE = 18
 RANKS = ["beginner", "intermediate", "advanced"]
 
 #Begginner thresholds
+BEGINER_THRESHOLD = 4
+INTERMEDIATE_THRESHOLD = 8
+ADVANCED_THRESHOLD = 12
 
 
 #Dictionaries
@@ -23,7 +27,6 @@ RANKS = ["beginner", "intermediate", "advanced"]
 #user attributes define various things the user has
 user_attributes = {
     "isCompletedQuiz": False,
-    "userAnswrs": [], #The user answers will display in a list
     "correctAnswers": [], #correct answers will be empty for now
     "wrongAnswers": [], #wrong answers will be empty for you.
     "userName": "", #The userName will initially be an empty string
@@ -32,23 +35,36 @@ user_attributes = {
 
 #Questions of the quiz
 quiz_questions = {
-    1 : 	"How do you win in chess?",
+    1 : "How do you win in chess: A By Check, B: Capturing all pieces: C: Checkmate: D: Capturing the Queen",
     2 :	"True or False: The knight can jump over pieces.",
-    3 : 	"What directions can the queen go in? A: Up, B: Down, C: side to side, D: Diagonal, E: all of the above",
+    3 : "What directions can the queen go in? A: Up, B: Down, C: side to side, D: Diagonal, E: all of the above",
     4 :	"What is a check?",
     5 :	"Can you block a check with another piece?",
     6 :	"Which side goes first, white or black?",
-    7 :	"What pieces can the pawn change if it reaches the end of the rank?",
+    7 :	"What pieces can the pawn change if it reaches the end of the rank: A: Queen, B: Bishop: C: Knight, D: Rook, E: All of the above",
     8 :	"True or false: The king can move more than one space.",
     9 :	"Can the pawn move up two spaces after it’s moved from its starting position?",
     10:	"True or False: You can capture a pawn if the pawn has moved two squares from its starting position.",
-    11:	"What is a stalemate?",
+    11:	"What is a stalemate: A: Checking the king B: The king has no legal moves while not in check C: The king has nowhere to move but in check D: Just a random term.",
     12:	"Can the king castle after it was checked?"
 
 }
 
 #key words or answers of the quiz:
-quiz_answers = {}
+quiz_answers = {
+    1: "c",
+    2: "true",
+    3: "e",
+    4: "a",
+    5: "yes",
+    6: "white",
+    7: "e",
+    8: "false",
+    9: "no",
+    10: "true",
+    11: "b",
+    12: "no"
+}
 
 
 # This function will clear the console
@@ -61,11 +77,68 @@ def cleanText(user_input: str)-> str:
     cleanedText = user_input.replace(" ", "") #Replce any spaces with no spaces
     cleanedText = user_input.strip(string.punctuation) #remove special characters
     return cleanedText
+
+
+#Function to run the quiz
+def runQuiz():
+    #set the player score to zero
+    playerScore = 0
+    #Loop through the questions
+    for question_number, questions in quiz_questions.items():
+            user_input = input(questions +"\n >")
+            user_input = cleanText(user_input)
+            #Check if the user input is correct and add towards the correct answers list
+            if user_input == quiz_answers[question_number]:
+                print("You are correct!!!!")
+                #TODO fix the incrementation of user answers
+                user_attributes["correctAnswers"]
+                #Increment the score
+                playerScore += 1
+                time.sleep(1.5)
+                clearText()
+                continue
+            #Check if the user input is incorrect and add towards the incorrect answers list
+            elif user_input != quiz_answers[question_number]:
+                print("You are incorrect!!!")
+                user_input += user_attributes["wrongAnswers"]
+                time.sleep(1.5)
+                clearText()
+                continue
+            else:
+                print("Please enter a valid input. Try again")
+    #Tell the user that they have done all the questions
+    print("Well done!!! You have completed all of the questions!!!")
+    user_input = input("Would you like to see your results??? (yes: or no)")
+    user_input = cleanText(user_input)
+    #Check whether the user promts yes, no, or nothing and the program will give different responses
+    while True:
+        if user_input in ["yes", "y"]:
+            print("Okay then, here are your results \n Hope you do well!!!!!")
+
+            continue
+        elif user_input in ["no", "n"]:
+            print("It's okay user. You can view your results next time")
+            break
+        else:
+            print("Please try again and answer either 'yes' or 'no")
     
     
 #Function to ask the user if they are ready
 def readyQuiz():
-    print("This is the ready quiz function running!!")    
+    user_input = input("Are you ready for the quiz?(yes or no): \n >")
+    user_input = cleanText(user_input)
+    #Check whether the user promts yes, no, or nothing and the program will give different responses
+    while True:
+        if user_input in ["yes", "y"]:
+            print("Great! This quiz will progressively get harder as you move onto the questions! \n Good luck!!!!!!")
+            runQuiz()
+            continue
+        elif user_input in ["no", "n"]:
+            print("It's okay user. You can play this quiz whenever you are ready ")
+            break
+        else:
+            print("Please try again and answer either 'yes' or 'no")
+        
 
 
 def displayInstructions():
@@ -88,16 +161,18 @@ def displayInstructions():
     #Ask the user their name
     #The user must input something
     while True:
-        #Set the isNotEmpty to true for now
         user_input = input("What is your name? \n >")
         user_input = cleanText(user_input)
         user_attributes["userName"] = user_input
+        #if no user input, promt the user to try again.
         if not user_input:
             print("Sorry, you need to enter something. Please try again")
-            break
+            continue
         else:
             print(f"Welcome {user_input}! Before you partake in this quiz, we need to verify your age.")
         try:
+            #Ask for the user input where it only expects an int
+            #Accept the user if only they are within the min age and max age.
             user_input = int(input("What is your age? \n >"))
             if user_input < MIN_AGE or user_input > MAX_AGE:
                 print("Sorry, you are not within the age group. Have a nice day!!!")
@@ -105,11 +180,12 @@ def displayInstructions():
                 exit()
             else:
                 print("Welcome to this quiz!!!")
-                displayInstructions()
+                time.sleep(1.5)
+                clearText()
+                readyQuiz()
         except ValueError:
             print("Sorry, you must enter a valid integer.")
-            break
-        #Ask for the user input where it only expects an int
+            continue
 
 displayInstructions()
 
