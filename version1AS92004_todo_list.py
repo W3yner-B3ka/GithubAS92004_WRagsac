@@ -1,9 +1,9 @@
-#Version 3.0
+#Version 4.0
 # This program will be about a chess quiz that ranges from difficulty--easy, medium, or hard.
 #Github commit: Start the backbone of the structure and work on the welcomeText and defiining the constants and dictionaries
 #Done the display insturctions and ready quiz. They run as usual
-
-#TODO Fix errors within the run quiz function.
+#Fixed the readyQuiz function and fixed some code on the runquiz function. Started on the displayscore functionn
+#TODO Fix errors within the instructions text and some on the run quiz
 
 #modules
 import time
@@ -31,6 +31,7 @@ user_attributes = {
     "wrongAnswers": [], #wrong answers will be empty for you.
     "userName": "", #The userName will initially be an empty string
     "rank": RANKS, #Ranks defined as beginner, intermediate, advanced
+    "userScore": 0 #Score is initially set as zero
 }
 
 #Questions of the quiz
@@ -79,33 +80,43 @@ def cleanText(user_input: str)-> str:
     return cleanedText
 
 
+#Display the results
+def displayResults():
+    print("Thank you for participating in this quiz!!!")
+    #Display the results
+    print("Here are your correct answers")
+    for question_number, question in quiz_questions.items():
+        for right_answers in user_attributes["correctAnswers"]:
+            print(f"{question_number}, {question}")
+            print(f"""{right_answers} ✔️""")
+
+
+
 #Function to run the quiz
 def runQuiz():
-    #set the player score to zero
-    playerScore = 0
     #Loop through the questions
     for question_number, questions in quiz_questions.items():
             user_input = input(questions +"\n >")
             user_input = cleanText(user_input)
-            #Check if the user input is correct and add towards the correct answers list
-            if user_input == quiz_answers[question_number]:
-                print("You are correct!!!!")
-                #TODO fix the incrementation of user answers
-                user_attributes["correctAnswers"]
-                #Increment the score
-                playerScore += 1
-                time.sleep(1.5)
-                clearText()
-                continue
-            #Check if the user input is incorrect and add towards the incorrect answers list
-            elif user_input != quiz_answers[question_number]:
-                print("You are incorrect!!!")
-                user_input += user_attributes["wrongAnswers"]
-                time.sleep(1.5)
-                clearText()
-                continue
-            else:
-                print("Please enter a valid input. Try again")
+            while True:
+                #Check if the user input is correct and add towards the correct answers list
+                if user_input == quiz_answers[question_number]:
+                    print("You are correct!!!!")
+                    user_attributes["correctAnswers"].append(user_input)
+                    #Increment the score
+                    user_attributes["userScore"] += 1
+                    time.sleep(1.5)
+                    clearText()
+                    break
+                    #Check if the user input is incorrect and add towards the incorrect answers list
+                elif user_input not in quiz_answers[question_number]:
+                    print("You are incorrect!!!")
+                    user_attributes["wrongAnswers"].append(user_input)
+                    time.sleep(1.5)
+                    clearText()
+                    break
+                elif user_input == "":
+                    print("Please enter a valid input. Try again")
     #Tell the user that they have done all the questions
     print("Well done!!! You have completed all of the questions!!!")
     user_input = input("Would you like to see your results??? (yes: or no)")
@@ -114,8 +125,8 @@ def runQuiz():
     while True:
         if user_input in ["yes", "y"]:
             print("Okay then, here are your results \n Hope you do well!!!!!")
-
-            continue
+            displayResults()
+            break
         elif user_input in ["no", "n"]:
             print("It's okay user. You can view your results next time")
             break
@@ -131,13 +142,19 @@ def readyQuiz():
     while True:
         if user_input in ["yes", "y"]:
             print("Great! This quiz will progressively get harder as you move onto the questions! \n Good luck!!!!!!")
+            time.sleep(1.5)
+            clearText()
             runQuiz()
-            continue
+            break
         elif user_input in ["no", "n"]:
             print("It's okay user. You can play this quiz whenever you are ready ")
+            exit()
             break
         else:
-            print("Please try again and answer either 'yes' or 'no")
+            time.sleep(1.5)
+            clearText()
+            user_input = input("Please try again and answer either 'yes' or 'no \n >")
+            continue
         
 
 
@@ -167,6 +184,8 @@ def displayInstructions():
         #if no user input, promt the user to try again.
         if not user_input:
             print("Sorry, you need to enter something. Please try again")
+            time.sleep(1.5)
+            clearText()
             continue
         else:
             print(f"Welcome {user_input}! Before you partake in this quiz, we need to verify your age.")
@@ -178,14 +197,15 @@ def displayInstructions():
                 print("Sorry, you are not within the age group. Have a nice day!!!")
                 time.sleep(1.5)
                 exit()
+                break
             else:
                 print("Welcome to this quiz!!!")
                 time.sleep(1.5)
                 clearText()
                 readyQuiz()
+                break
         except ValueError:
-            print("Sorry, you must enter a valid integer.")
-            continue
+            user_input = input("Sorry, you must enter a valid integer. \n What is your age? \n >")
 
 displayInstructions()
 
