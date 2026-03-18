@@ -1,11 +1,12 @@
-#Version 5.0
+#Version 6.0
 # This program will be about a chess quiz that ranges from difficulty--easy, medium, or hard.
 #Github commit: Start the backbone of the structure and work on the welcomeText and defiining the constants and dictionaries
 #Done the display insturctions and ready quiz. They run as usual
 #Fixed the readyQuiz function and fixed some code on the runquiz function. Started on the displayscore functionn
 #Fixed all of readyQuiz() runQuiz() welcomeText()
+#Fixed the cleanText() and allows proper logic for yes, no or nothing
 
-#TODO: Need to focus on the display results and fix errors. Also test other functions to make sure they are working.
+#TODO: Fixed all of the other functions. Need to heavily work on the logic for displaying the results Also test other functions to make sure they are working.
 
 #modules
 import time
@@ -21,7 +22,7 @@ MAX_AGE = 18
 RANKS = ["beginner", "intermediate", "advanced"]
 
 #Begginner thresholds
-BEGINER_THRESHOLD = 4
+BEGINNER_THRESHOLD = 4
 INTERMEDIATE_THRESHOLD = 8
 ADVANCED_THRESHOLD = 12
 
@@ -80,8 +81,8 @@ def clearText():
 #Clean the text input and it only accepts a string
 def cleanText(user_input: str)-> str:
     cleanedText = user_input.lower().strip() #Strip any spaces and all lowercase
-    cleanedText = user_input.replace(" ", "") #Replce any spaces with no spaces
-    cleanedText = user_input.strip(string.punctuation) #remove special characters
+    cleanedText = cleanedText.replace(" ", "") #Replce any spaces with no spaces
+    cleanedText = cleanedText.strip(string.punctuation) #remove special characters
     return cleanedText
 
 
@@ -93,31 +94,32 @@ def displayResults():
     for question_number, question in quiz_questions.items():
         #display the user_answers or else return no answer
         #Get the user_answers, correct_answers, and wrong_answers
-        user_answers = user_attributes.get("userAnswers", "No answer")
-        correct_answers = user_attributes.get("correctAnswers", "No answer")
-        wrong_answers = user_attributes.get("wrongAnswers", "No answer")
-        #if the user answer is in the question, then display it. Else display a X with it
-        print(f"{question_number}: {question}")
-        if user_answers in correct_answers:
+        user_answers = user_attributes.get("userAnswers", {})
+        correct_answers = user_attributes.get("correctAnswers", [])
+        wrong_answers = user_attributes.get("wrongAnswers", [])
+        #Correct answers
+        print(user_answers)
+        print(correct_answers)
+        print(wrong_answers)
+        if user_answers in quiz_answers:
             result = "✅"
             print(f"Your answer: {user_answers} {result}")
             print(f"{correct_answers}")
-        elif user_answers in wrong_answers:
+        #wrong answers
+        else:
             result = "❌"
             print(f"Your answer: {user_answers} {result}")
             print(f"Wrong answer: {wrong_answers}")
-            print(f"Correct answer: {correct_answers}")
+            print(f"Correct answer: {quiz_answers[question_number]}")
     #Detemine the user's score
     #when the user score is less than or equal to the beginner threshold
-    if user_attributes["userScore"] <= BEGINER_THRESHOLD:
+    if user_attributes["userScore"] <= BEGINNER_THRESHOLD:
         print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]}. It seems that you are a {RANKS[0]}. Have fun on your chess journey!!!")
     #Display that they are intermediate when they score more than the beginner threshold but less than or equal to the intermediate threshold
-    if BEGINER_THRESHOLD < user_attributes["userScore"] <= INTERMEDIATE_THRESHOLD:
+    if BEGINNER_THRESHOLD < user_attributes["userScore"] <= INTERMEDIATE_THRESHOLD:
         print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]}. It seems that you are a {RANKS[1]}. You are so close to beating the quiz!!!")
     if user_attributes["userScore"] <= ADVANCED_THRESHOLD:
         print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]}. It seems that you are a {RANKS[2]}. Well done!!! You have a solid foundation of chess!!!")
-    time.sleep(1.5)
-    clearText()
     #Redirect them to the website
     while True:
         user_input = input("Would you like more information about chess? (yes or no)")
@@ -191,13 +193,13 @@ def readyQuiz():
     while True:
         user_input = input("Are you ready for the quiz?(yes or no): \n >")
         user_input = cleanText(user_input)
-        if user_input == "yes" or "y":
+        if user_input in ["yes", "n"]:
             print("Great! This quiz will progressively get harder as you move onto the questions! \n Good luck!!!!!!")
             time.sleep(1.5)
             clearText()
             runQuiz()
             break
-        elif user_input == "no" or "n":
+        elif user_input in ["no", "n"]:
             print("It's okay user. You can play this quiz whenever you are ready ")
             exit()
             break
@@ -261,6 +263,3 @@ def displayInstructions():
             print("Sorry, you must enter a valid integer")
 
 displayInstructions()
-
-       
-
