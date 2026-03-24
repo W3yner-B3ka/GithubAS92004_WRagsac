@@ -1,12 +1,14 @@
-#Version 6.0
+#Version 7.0
 # This program will be about a chess quiz that ranges from difficulty--easy, medium, or hard.
 #Github commit: Start the backbone of the structure and work on the welcomeText and defiining the constants and dictionaries
 #Done the display insturctions and ready quiz. They run as usual
 #Fixed the readyQuiz function and fixed some code on the runquiz function. Started on the displayscore functionn
 #Fixed all of readyQuiz() runQuiz() welcomeText()
 #Fixed the cleanText() and allows proper logic for yes, no or nothing
+#Fixed the displayResults() and fixed some other bugs within the other functions
+#Allowed i
 
-#TODO: Fixed all of the other functions. Need to heavily work on the logic for displaying the results Also test other functions to make sure they are working.
+#TODO: Fixed all of the other functions. Need to test functions and fix any bugs. Then make the text look pretty!!!
 
 #modules
 import time
@@ -15,6 +17,38 @@ import string
 #redirect to website
 import webbrowser
 
+#Stylise
+import rich
+from rich.console import Console
+from rich.progress import (
+    Progress,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+    TimeRemainingColumn,
+)
+
+#Stylising area
+
+#Initialise the console
+console = Console()
+
+#This will add the progress bar that takes any message as long as its a string.
+#Sourced from https://enerrio.bearblog.dev/beautiful-progress-bars-in-rich/
+def progressBar(message):
+    progress = Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    )
+    progress_bar = progress.add_task(message, total=2000)
+    with progress:
+        #Increment by 1 milisecond until complete
+        for _ in range(2000):
+            progress.update(progress_bar, advance=1)
+            time.sleep(0.01)
+            
 #Constants
 MIN_AGE = 11
 MAX_AGE = 18
@@ -31,7 +65,6 @@ ADVANCED_THRESHOLD = 12
 
 #user attributes define various things the user has
 user_attributes = {
-    "isCompletedQuiz": False,
     "correctAnswers": [], #correct answers will be empty for now
     "wrongAnswers": [], #wrong answers will be empty for you.
     "userName": "", #The userName will initially be an empty string
@@ -97,36 +130,46 @@ def displayResults():
         user_answers = user_attributes.get("userAnswers", {})
         correct_answers = user_attributes.get("correctAnswers", [])
         wrong_answers = user_attributes.get("wrongAnswers", [])
+        
+        #Get the user answer from the  question number previously assigned.
+        #If the user inputs no answer, give no answer.
+        user_answer = user_answers.get(question_number, "No answer")
+        
+        #print out the questions
+        print(f"{question_number}: {question}")
+        
         #Correct answers
-        print(user_answers)
-        print(correct_answers)
-        print(wrong_answers)
-        if user_answers in quiz_answers:
+        if user_answer in correct_answers:
             result = "✅"
-            print(f"Your answer: {user_answers} {result}")
-            print(f"{correct_answers}")
+            print(f"Your answer: {user_answer}: {result}")
         #wrong answers
-        else:
+        elif user_answer in wrong_answers:
             result = "❌"
-            print(f"Your answer: {user_answers} {result}")
-            print(f"Wrong answer: {wrong_answers}")
+            print(f"Your answer: {user_answer}: {result}")
+            print(f"Correct answer: {quiz_answers[question_number]}")
+        #No answers
+        else:
+            result = "😑"
+            print(f"Your answer: {user_answer}: {result}")
             print(f"Correct answer: {quiz_answers[question_number]}")
     #Detemine the user's score
     #when the user score is less than or equal to the beginner threshold
     if user_attributes["userScore"] <= BEGINNER_THRESHOLD:
-        print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]}. It seems that you are a {RANKS[0]}. Have fun on your chess journey!!!")
+        print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]} out of {len(quiz_answers)}. It seems that you are a {RANKS[0]}. Have fun on your chess journey!!!")
     #Display that they are intermediate when they score more than the beginner threshold but less than or equal to the intermediate threshold
     if BEGINNER_THRESHOLD < user_attributes["userScore"] <= INTERMEDIATE_THRESHOLD:
-        print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]}. It seems that you are a {RANKS[1]}. You are so close to beating the quiz!!!")
-    if user_attributes["userScore"] <= ADVANCED_THRESHOLD:
-        print(f"I'm sorry {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]}. It seems that you are a {RANKS[2]}. Well done!!! You have a solid foundation of chess!!!")
+        print(f"You seem to have a decent understanding {user_attributes["userName"]}, you have a score of {user_attributes["userScore"]} out of {len(quiz_answers)}. It seems that you are a {RANKS[1]}. You are so close to beating the quiz!!!")
+    if user_attributes["userScore"] >= ADVANCED_THRESHOLD:
+        print(f"Good job {user_attributes["userName"]}!!! you have a score of {user_attributes["userScore"]} out of {len(quiz_answers)}. It seems that you are a {RANKS[2]}. Well done!!! You have a solid foundation of chess!!!")
     #Redirect them to the website
     while True:
         user_input = input("Would you like more information about chess? (yes or no)")
         user_input = cleanText(user_input)
-        #If yes, then redirect them towards the website. If no, then politely exit the program. Else ask them to reinput their thing
+        #If yes, then redirect them towards the website. 
+        # If no, then politely exit the program. 
+        # Else ask them to reinput their thing
         if user_input in ["yes", "y"]:
-            print("Okay then!!! Here is lichess! This will help you understand more on chess!!!!")
+            console.print("[dark_sea_green]Okay then!!! Here is lichess! This will help you understand more on chess!!!![/dark_sea_green]")
             webbrowser.open("https://lichess.org/")
             break
         elif user_input in ["no", "n"]:
@@ -135,24 +178,20 @@ def displayResults():
             break
         else:
             print("Please enter either 'yes', or 'no'")
-            
-            
         
-
-
-
 #Function to run the quiz
 def runQuiz():
     #Loop through the questions
     for question_number, questions in quiz_questions.items():
-            while True:
                 user_input = input(questions +"\n >")
                 user_input = cleanText(user_input)
                 #Check if the user input is correct and add towards the correct answers list
                 if user_input == "":
-                    print("Please enter a valid input. Try again")
+                    console.print("[orange3]Don't wory if you don't answer! It's fine if you don't know! We will move onto the next question.[/orange3]")
+                    time.sleep(1.5)
+                    clearText()
                 elif user_input == quiz_answers[question_number]:
-                    print("You are correct!!!!")
+                    console.print("[dark_sea_green]You are correct!!!![/dark_sea_green]")
                     user_attributes["correctAnswers"].append(user_input)
                     #Add the answer to the user's answers
                     user_attributes["userAnswers"][question_number] = user_input
@@ -160,16 +199,14 @@ def runQuiz():
                     user_attributes["userScore"] += 1
                     time.sleep(1.5)
                     clearText()
-                    break
                     #Check if the user input is incorrect and add towards the incorrect answers list
                 elif user_input not in quiz_answers[question_number]:
-                    print("You are incorrect!!!")
+                    console.print("[red3]You are incorrect!!![/red3]")
                     user_attributes["wrongAnswers"].append(user_input)
                     #Add the answer to the user's answers
                     user_attributes["userAnswers"][question_number] = user_input
                     time.sleep(1.5)
                     clearText()
-                    break
     #Tell the user that they have done all the questions
     print("Well done!!! You have completed all of the questions!!!")
     #Check whether the user promts yes, no, or nothing and the program will give different responses
@@ -177,8 +214,9 @@ def runQuiz():
         user_input = input("Would you like to see your results??? (yes: or no)")
         user_input = cleanText(user_input)
         if user_input in ["yes", "y"]:
-            print("Okay then, here are your results \n Hope you do well!!!!!")
+            console.print("[dark_sea_green]Okay then, here are your results \n Hope you do well!!!!![/dark_sea_green]")
             displayResults()
+            progressBar("Loading results")
             break
         elif user_input in ["no", "n"]:
             print("It's okay user. You can view your results next time")
@@ -194,24 +232,36 @@ def readyQuiz():
         user_input = input("Are you ready for the quiz?(yes or no): \n >")
         user_input = cleanText(user_input)
         if user_input in ["yes", "n"]:
-            print("Great! This quiz will progressively get harder as you move onto the questions! \n Good luck!!!!!!")
+            print("Great! This quiz will progressively get harder as you move onto the questions!")
+            console.print("""[steel_blue3]
+░██████╗░░█████╗░░█████╗░██████╗░  ██╗░░░░░██╗░░░██╗░█████╗░██╗░░██╗██╗██╗██╗██╗██╗██╗
+██╔════╝░██╔══██╗██╔══██╗██╔══██╗  ██║░░░░░██║░░░██║██╔══██╗██║░██╔╝██║██║██║██║██║██║
+██║░░██╗░██║░░██║██║░░██║██║░░██║  ██║░░░░░██║░░░██║██║░░╚═╝█████═╝░██║██║██║██║██║██║
+██║░░╚██╗██║░░██║██║░░██║██║░░██║  ██║░░░░░██║░░░██║██║░░██╗██╔═██╗░╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝
+╚██████╔╝╚█████╔╝╚█████╔╝██████╔╝  ███████╗╚██████╔╝╚█████╔╝██║░╚██╗██╗██╗██╗██╗██╗██╗
+░╚═════╝░░╚════╝░░╚════╝░╚═════╝░  ╚══════╝░╚═════╝░░╚════╝░╚═╝░░╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝
+[/steel_blue3]""")
+            #Display the progress bar with the message loading quiz
+            progressBar("Loading quiz")
             time.sleep(1.5)
             clearText()
             runQuiz()
             break
         elif user_input in ["no", "n"]:
-            print("It's okay user. You can play this quiz whenever you are ready ")
+            console.print("It's okay user. You can play this quiz whenever you are ready ")
             exit()
             break
         else:
             time.sleep(1.5)
             clearText()
-            print("Please try again and answer either 'yes' or 'no \n >")
+            print("Please try again and answer either 'yes' or 'no")
 
 
 def displayInstructions():
     #Display the chess pieces
-    print("""                                                       .::.
+    console.print("""
+    [steel_blue3]
+                  .::.
                                             _()_       _::_
                                   _O      _/____\_   _/____\_
            _  _  _     ^^__      / //\    \      /   \      /
@@ -224,42 +274,42 @@ def displayInstructions():
  (_____)  (_______) (________) (_______) (________) (________)
  /_____\  /_______\ /________\ /_______\ /________\ /________\
                                              __By Alefith 22.02.95__
-""")
-    print("""𝖂𝖊𝖑𝖈𝖔𝖒𝖊 𝖙𝖔 𝖙𝖍𝖎𝖘 𝖈𝖍𝖊𝖘𝖘 𝖖𝖚𝖎𝖟!""")
+[/steel_blue3]""")
+    console.print("""[medium_purple]𝖂𝖊𝖑𝖈𝖔𝖒𝖊 𝖙𝖔 𝖙𝖍𝖎𝖘 𝖈𝖍𝖊𝖘𝖘 𝖖𝖚𝖎𝖟![/medium_purple]""")
     #Ask the user their name
     #The user must input something
     while True:
-        user_input = input("What is your name? \n >")
+        user_input = console.input("[dark_sea_green]What is your name? \n >[/dark_sea_green]")
         user_input = cleanText(user_input)
         user_attributes["userName"] = user_input
         #if no user input, promt the user to try again.
         if not user_input:
-            print("Sorry, you need to enter something. Please try again")
+            console.print("[red3]Sorry, you need to enter something. Please try again[/red3]")
             time.sleep(1.5)
             clearText()
             continue
         else:
-            print(f"Welcome {user_input}! Before you partake in this quiz, we need to verify your age.")
+            console.print(f"[dark_sea_green]Welcome {user_input}! Before you partake in this quiz, we need to verify your age.[/dark_sea_green]")
             break
     while True:
         try:
             #Ask for the user input where it only expects an int
             #Accept the user if only they are within the min age and max age.
-            user_input = int(input("What is your age? \n >"))
+            user_input = int(console.input("[dark_sea_green]What is your age? \n >[/dark_sea_green]"))
             if user_input < MIN_AGE or user_input > MAX_AGE:
-                print("Sorry, you are not within the age group. Have a nice day!!!")
+                console.print("[red3]Sorry, you are not within the age group. Have a nice day!!![/red3]")
                 time.sleep(1.5)
                 exit()
                 break
             else:
                 #Allow them to enter the quiz and break the while true loop
-                print("Welcome to this quiz!!!")
+                console.print("[dark_sea_green]Welcome to this quiz!!![/dark_sea_green]")
                 time.sleep(1.5)
                 clearText()
                 readyQuiz()
                 break
         #Continue asking the user until it enters a valid int.
         except ValueError:
-            print("Sorry, you must enter a valid integer")
+            console.print("[red3]Sorry, you must enter a valid integer[/red3]")
 
 displayInstructions()
