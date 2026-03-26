@@ -1,5 +1,6 @@
-#Version 8.0
+#Version 9.0
 # This program will be about a chess quiz that ranges from difficulty--easy, medium, or hard.
+#First 4 questions are easy, next 4 questions are medium, next 4 questions are advanced.
 #Github commit: Start the backbone of the structure and work on the welcomeText and defiining the constants and dictionaries
 #Done the display insturctions and ready quiz. They run as usual
 #Fixed the readyQuiz function and fixed some code on the runquiz function. Started on the displayscore functionn
@@ -7,8 +8,8 @@
 #Fixed the cleanText() and allows proper logic for yes, no or nothing
 #Fixed the displayResults() and fixed some other bugs within the other functions
 #Fixed the majority of the bugs and added some styling into the console
-
-#TODO: Continue testing functions and search for small errors. Also add more styling to make it look pretty!!!!
+#Added good styling of the console as well as progress bars. Fixed all errors and tested all functions.
+#Ready for submission!!!
 
 #modules
 import time
@@ -18,6 +19,7 @@ import string
 import webbrowser
 
 #Stylise
+#Added styling in version 7.0
 import rich
 from rich.console import Console
 from rich.progress import (
@@ -112,6 +114,7 @@ def clearText():
     os.system("cls" if os.name == "nt" else "clear")
     
 #Clean the text input and it only accepts a string
+#Fixed in version 6.0 19/3/26
 def cleanText(user_input: str)-> str:
     cleanedText = user_input.lower().strip() #Strip any spaces and all lowercase
     cleanedText = cleanedText.replace(" ", "") #Replce any spaces with no spaces
@@ -139,9 +142,9 @@ def displayResults():
         wrong_answers = user_attributes.get("wrongAnswers", [])
         #Get the user answer from the  question number previously assigned.
         #If the user inputs no answer, give no answer.
-        user_answer = user_answers.get(question_number, "No answer")
+        user_answer = user_answers.get(question_number, "No answer") #Added this line in version 7.0
         #Get the user score. If there is no user score, set the score as zero.
-        user_score = user_attributes.get("userScore", 0)
+        user_score = user_attributes.get("userScore", 0) #Added in version 8.0
 
         #print out the questions
         print(f"{question_number}: {question}")
@@ -149,17 +152,17 @@ def displayResults():
         #Correct answers
         if user_answer in correct_answers:
             result = "✅"
-            console.print(f"[dark-sea-green]Your answer: {user_answer}: {result}[/dark-sea-green]")
+            console.print(f"[dark_sea_green]Your answer: {user_answer}: {result}[/dark_sea_green]")
         #wrong answers
         elif user_answer in wrong_answers:
             result = "❌"
             console.print(f"[red3]Your answer: {user_answer}: {result}[/red3]")
-            console.print(f"[dark-sea-green]Correct answer: {quiz_answers[question_number]}[/dark-sea-green]")
+            console.print(f"[dark_sea_green]Correct answer: {quiz_answers[question_number]}[/dark_sea_green]")
         #No answers
         else:
             result = "😑"
             console.print(f"[yellow3]Your answer: {user_answer}: {result}[/yellow3]")
-            console.print(f"[dark-sea-green]Correct answer: {quiz_answers[question_number]}[/dark-sea-green]")
+            console.print(f"[dark_sea_green]Correct answer: {quiz_answers[question_number]}[/dark_sea_green]")
     #Detemine the user's score
     #when the user score is less than or equal to the beginner threshold
     if user_score <= BEGINNER_THRESHOLD:
@@ -251,7 +254,35 @@ def runQuiz():
                     time.sleep(1.5)
                     clearText()
     #Tell the user that they have done all the questions
-    print("Well done!!! You have completed all of the questions!!!")
+    console.print("[steel_blue3]Well done!!![/steel_blue3]")
+    console.print("""[steel_blue3]
+██╗░░░██╗░█████╗░██╗░░░██╗  ██╗░░██╗░█████╗░██╗░░░██╗███████╗
+╚██╗░██╔╝██╔══██╗██║░░░██║  ██║░░██║██╔══██╗██║░░░██║██╔════╝
+░╚████╔╝░██║░░██║██║░░░██║  ███████║███████║╚██╗░██╔╝█████╗░░
+░░╚██╔╝░░██║░░██║██║░░░██║  ██╔══██║██╔══██║░╚████╔╝░██╔══╝░░
+░░░██║░░░╚█████╔╝╚██████╔╝  ██║░░██║██║░░██║░░╚██╔╝░░███████╗
+░░░╚═╝░░░░╚════╝░░╚═════╝░  ╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚══════╝
+
+░█████╗░░█████╗░███╗░░░███╗██████╗░██╗░░░░░███████╗████████╗███████╗██████╗░  ░█████╗░██╗░░░░░██╗░░░░░
+██╔══██╗██╔══██╗████╗░████║██╔══██╗██║░░░░░██╔════╝╚══██╔══╝██╔════╝██╔══██╗  ██╔══██╗██║░░░░░██║░░░░░
+██║░░╚═╝██║░░██║██╔████╔██║██████╔╝██║░░░░░█████╗░░░░░██║░░░█████╗░░██║░░██║  ███████║██║░░░░░██║░░░░░
+██║░░██╗██║░░██║██║╚██╔╝██║██╔═══╝░██║░░░░░██╔══╝░░░░░██║░░░██╔══╝░░██║░░██║  ██╔══██║██║░░░░░██║░░░░░
+╚█████╔╝╚█████╔╝██║░╚═╝░██║██║░░░░░███████╗███████╗░░░██║░░░███████╗██████╔╝  ██║░░██║███████╗███████╗
+░╚════╝░░╚════╝░╚═╝░░░░░╚═╝╚═╝░░░░░╚══════╝╚══════╝░░░╚═╝░░░╚══════╝╚═════╝░  ╚═╝░░╚═╝╚══════╝╚══════╝
+
+░█████╗░███████╗  ████████╗██╗░░██╗███████╗
+██╔══██╗██╔════╝  ╚══██╔══╝██║░░██║██╔════╝
+██║░░██║█████╗░░  ░░░██║░░░███████║█████╗░░
+██║░░██║██╔══╝░░  ░░░██║░░░██╔══██║██╔══╝░░
+╚█████╔╝██║░░░░░  ░░░██║░░░██║░░██║███████╗
+░╚════╝░╚═╝░░░░░  ░░░╚═╝░░░╚═╝░░╚═╝╚══════╝
+
+░██████╗░██╗░░░██╗███████╗░██████╗████████╗██╗░█████╗░███╗░░██╗░██████╗██╗██╗██╗
+██╔═══██╗██║░░░██║██╔════╝██╔════╝╚══██╔══╝██║██╔══██╗████╗░██║██╔════╝██║██║██║
+██║██╗██║██║░░░██║█████╗░░╚█████╗░░░░██║░░░██║██║░░██║██╔██╗██║╚█████╗░██║██║██║
+╚██████╔╝██║░░░██║██╔══╝░░░╚═══██╗░░░██║░░░██║██║░░██║██║╚████║░╚═══██╗╚═╝╚═╝╚═╝
+░╚═██╔═╝░╚██████╔╝███████╗██████╔╝░░░██║░░░██║╚█████╔╝██║░╚███║██████╔╝██╗██╗██╗
+░░░╚═╝░░░░╚═════╝░╚══════╝╚═════╝░░░░╚═╝░░░╚═╝░╚════╝░╚═╝░░╚══╝╚═════╝░╚═╝╚═╝╚═╝[/steel_blue3]""")
     #Check whether the user promts yes, no, or nothing and the program will give different responses
     while True:
         user_input = input("Would you like to see your results??? (yes: or no)")
@@ -278,10 +309,10 @@ def runQuiz():
 def readyQuiz():
     #Check whether the user promts yes, no, or nothing and the program will give different responses
     while True:
-        user_input = input("Are you ready for the quiz?(yes or no): \n >")
+        user_input = console.input("[steel_blue3]Are you ready for the quiz?(yes or no): \n >[/steel_blue3]")
         user_input = cleanText(user_input)
         if user_input in ["yes", "y"]:
-            print("Great! This quiz will progressively get harder as you move onto the questions!")
+            console.print("[dark_sea_green]Great! This quiz will progressively get harder as you move onto the questions![/dark_sea_green]")
             console.print("""[steel_blue3]
 ░██████╗░░█████╗░░█████╗░██████╗░  ██╗░░░░░██╗░░░██╗░█████╗░██╗░░██╗██╗██╗██╗██╗██╗██╗
 ██╔════╝░██╔══██╗██╔══██╗██╔══██╗  ██║░░░░░██║░░░██║██╔══██╗██║░██╔╝██║██║██║██║██║██║
@@ -290,6 +321,7 @@ def readyQuiz():
 ╚██████╔╝╚█████╔╝╚█████╔╝██████╔╝  ███████╗╚██████╔╝╚█████╔╝██║░╚██╗██╗██╗██╗██╗██╗██╗
 ░╚═════╝░░╚════╝░░╚════╝░╚═════╝░  ╚══════╝░╚═════╝░░╚════╝░╚═╝░░╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝
 [/steel_blue3]""")
+            console.print("[steel_blue3]Make sure you spell correctly!!![/steel_blue3]")
             #Display the progress bar with the message loading quiz
             progressBar("Loading quiz")
             time.sleep(1.5)
